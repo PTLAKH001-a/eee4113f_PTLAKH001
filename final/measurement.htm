@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+        .outer-container {
+            border: 2px solid #000;
+            padding: 20px;
+            min-width: 200px;
+            text-align: left;
+            position: relative;
+        }
+        .logo-container {
+            position: absolute;
+            top: 200px; /* Adjust as needed */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        .inner-container {
+            margin-bottom: 10px;
+        }
+        .reading-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .reading-label,
+        .reading-value {
+            flex-basis: 30%; /* Adjust the width as needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="FitzPatrick-Logo3.png" alt="Logo">
+    </div>
+    <div class="outer-container">
+        <div class="inner-container">
+            <div class="reading-button">
+                <div class="reading-label">Weight:</div>
+                <div class="reading-value">2.32kg</div>
+            </div>
+        </div>
+        <div class="inner-container">
+            <div class="reading-button">
+                <div class="reading-label">RFID:</div>
+                <div class="reading-value">1</div>
+            </div>
+        </div>
+        <div class="inner-container">
+            <div class="reading-button">
+                <div class="reading-label">Temperature:</div>
+                <div class="reading-value">23.6°C</div>
+            </div>
+        </div>
+        <div class="inner-container">
+            <div class="reading-button">
+                <div class="reading-label">Humidity:</div>
+                <div class="reading-value">0</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

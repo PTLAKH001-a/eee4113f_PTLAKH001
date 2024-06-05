@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>READ CSV</title>
+    <style> 
+        td {
+            border: 2px solid rgb(59, 212, 13);
+            padding: 10px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-around; /* Changed from space-between */
+            flex-wrap: wrap; /* Added to allow wrapping */
+        }
+        .graph-container {
+            max-width: 90%; /* Set the max width of each graph container */
+            min-width: 600px; /* Set a minimum width for each graph container */
+            margin-bottom: 20px; /* Added margin to create space between graphs */
+            position: relative; /* Added for positioning the download button */
+        }
+        canvas {
+            width: 100%; /* Set the width of each canvas to 100% of its container */
+            height: auto; /* Set the height to auto to maintain aspect ratio */
+        }
+        .download-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style> 
+</head>
+<body>
+    <table>
+        <!-- Table will be populated dynamically -->
+    </table>
+    <div class="container">
+        <div class="graph-container">
+            <canvas id="lineChart"></canvas>
+            <button class="download-button" onclick="downloadChart('lineChart', 'lineChart.jpg')">Download</button>
+        </div>
+        <div class="graph-container">
+            <canvas id="temperatureChart"></canvas>
+            <button class="download-button" onclick="downloadChart('temperatureChart', 'temperatureChart.jpg')">Download</button>
+        </div>
+        <div class="graph-container">
+            <canvas id="barChart"></canvas>
+            <button class="download-button" onclick="downloadChart('barChart', 'barChart.jpg')">Download</button>
+        </div>
+        <div class="graph-container">
+            <canvas id="averageTemperatureChart"></canvas>
+            <button class="download-button" onclick="downloadChart('averageTemperatureChart', 'averageTemperatureChart.jpg')">Download</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Function to download canvas as image
+        function downloadChart(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const url = canvas.toDataURL('image/jpeg');
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.onload = () => {
+            fetch("updated_test.csv")
+            .then(response => response.text())
+            .then(data => {
+                console.log("CSV Data:", data);
+                const rows = data.trim().split(/\r?\n/);
+                console.log("Rows:", rows);
+                const avgWeight = {};
+                const avgTemperature = {};
+                const countData = {};
+
+                rows.forEach(row => {
+                    const [RFID, weightValue, temperatureValue] = row.split(";");
+                    console.log("RFID:", RFID, "Weight:", weightValue, "Temperature:", temperatureValue);
+                    if (!avgWeight[RFID]) {
+                        avgWeight[RFID] = 0;
+                        avgTemperature[RFID] = 0;
+                        countData[RFID] = 0;
+                    }
+                    avgWeight[RFID] += parseFloat(weightValue);
+                    avgTemperature[RFID] += parseFloat(temperatureValue);
+                    countData[RFID]++;
+                });
+
+                console.log("Average Weight:", avgWeight);
+                console.log("Average Temperature:", avgTemperature);
+                console.log("Data Counts:", countData);
+
+                const lineDatasets = {
+                    labels: Array.from({ length: 15 }, (_, i) => String(i + 1)),
+                    datasets: Object.keys(avgWeight).map(RFID => ({
+                        label: `RFID ${RFID} Weight`,
+                        data: rows.filter(row => row.startsWith(`${RFID};`)).map(row => parseFloat(row.split(";")[1])),
+                        borderColor: getColorForRFID(RFID),
+                        borderWidth: 2,
+                        fill: false
+                    }))
+                };
+
+                const barDatasets = {
+                    labels: Object.keys(avgWeight),
+                    datasets: [{
+                        label: 'Average Weight',
+                        data: Object.keys(avgWeight).map(RFID => avgWeight[RFID] / countData[RFID]),
+                        backgroundColor: ['red', 'green', 'blue', 'orange', 'purple', 'yellow'] 
+                    }]
+                };
+
+                const temperatureData = rows.map(row => parseFloat(row.split(";")[2])); // Extracting temperature data
+
+                const temperatureDataset = {
+                    labels: Array.from({ length: temperatureData.length }, (_, i) => String(i + 1)),
+                    datasets: [{
+                        label: 'Temperature',
+                        data: temperatureData,
+                        borderColor: 'orange',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                };
+
+                const averageTemperatureDataset = {
+                    labels: Array.from({ length: Math.ceil(temperatureData.length / 5) }, (_, i) => String(i + 1)),
+                    datasets: [{
+                        label: 'Average Temperature (every 5 readings)',
+                        data: calculateAverageTemperatureEvery5(temperatureData),
+                        backgroundColor: 'orange',
+                        borderWidth: 2,
+                    }]
+                };
+
+                console.log("Line Datasets:", lineDatasets);
+                console.log("Bar Datasets:", barDatasets);
+                console.log("Temperature Dataset:", temperatureDataset);
+
+                const lineCtx = document.getElementById('lineChart').getContext('2d');
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
+                const averageTemperatureCtx = document.getElementById('averageTemperatureChart').getContext('2d');
+
+                // Create a line chart for weight
+                const lineChart = new Chart(lineCtx, {
+                    type: 'line',
+                    data: lineDatasets,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Weight'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'RFID'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Create a bar chart for average weight
+                const barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: barDatasets,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Average Weight'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'RFID'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Create a line chart for temperature
+                const temperatureChart = new Chart(temperatureCtx, {
+                    type: 'line',
+                    data: temperatureDataset,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: 'Temperature'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Reading Number'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Create a bar chart for average temperature (every 5 readings)
+                const averageTemperatureChart = new Chart(averageTemperatureCtx, {
+                    type: 'bar',
+                    data: averageTemperatureDataset,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Average Temperature'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Group of Readings'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        };
+
+        // Function to calculate average temperature for every 5 consecutive readings
+        function calculateAverageTemperatureEvery5(temperatureData) {
+            const averages = [];
+            for (let i = 0; i < temperatureData.length; i += 5) {
+                const group = temperatureData.slice(i, i + 5);
+                const average = group.reduce((sum, value) => sum + value, 0) / group.length;
+                averages.push(average.toFixed(2)); // Round to 2 decimal places
+            }
+            return averages;
+        }
+
+        // Function to get color for each RFID
+        function getColorForRFID(RFID) {
+            switch (RFID) {
+                case "1":
+                    return 'red';
+                case "2":
+                    return 'green';
+                case "3":
+                    return 'blue';
+                default:
+                    return 'black'; // Default color for other RFIDs
+            }
+        }
+    </script>
+</body>
+</html>

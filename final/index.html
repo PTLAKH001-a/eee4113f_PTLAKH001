@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* Styles for the background container */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Ensure background is behind other content */
+            background-image: url('hornbilly.jpg'); /* Add your background image URL */
+            background-size: cover;
+            background-position: center;
+            opacity: 0.5; /* Adjust opacity as needed */
+        }
+        
+        /* Center align the container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative; /* Add position relative for overlay */
+        }
+
+        /* Styles for the logo */
+        .logo img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        
+        /* Styles for the buttons */
+        .buttons {
+            display: flex;
+            flex-direction: row; /* Display buttons horizontally */
+            align-items: center;
+            justify-content: space-between; /* Add space between buttons */
+            margin-top: 20px; /* Add margin between logo and buttons */
+        }
+
+        .buttons button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Styles for the images */
+        .image img {
+            width: 200px; /* Adjust image width as needed */
+            height: auto; /* Maintain aspect ratio */
+            margin-top: 20px; /* Add margin between button and image */
+        }
+
+        /* Container for button and image */
+        .button-image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div> <!-- Background container -->
+    <div class="container">
+        <div class="logo">
+            <img src="FitzPatrick-Logo3.png" alt="Logo">
+        </div>
+        <div class="buttons">
+            <!-- Button 1 -->
+            <div class="button-image-container">
+                <button onclick="navigateTo('download')">Download Stored Data</button>
+                <div class="image">
+                    <img src="downlaodicon.png" alt="Image 1"> 
+                </div>
+            </div>
+            <!-- Button 2 -->
+            <div class="button-image-container">
+                <button onclick="navigateTo('visualize')">Visualize Stored Data</button>
+                <div class="image">
+                    <img src="graphicon.png" alt="Image 2"> 
+                </div>
+            </div>
+            <!-- Button 3 -->
+            <div class="button-image-container">
+                <button onclick="navigateTo('power')">View Power Utility</button>
+                <div class="image">
+                    <img src="powericon.png" alt="Image 3"> 
+                </div>
+            </div>
+            <!-- Button 4 -->
+            <div class="button-image-container">
+                <button onclick="navigateTo('realtime')">View Real-time Measurements</button>
+                <div class="image">
+                    <img src="measurementicon.jpg" alt="Image 4"> 
+                </div>
+            </div>
+           
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            switch (page) {
+                case 'download':
+                    window.location.href = 'download.html'; 
+                    break;
+                case 'visualize':
+                    window.location.href = 'try.html'; 
+                    break;
+                case 'power':
+                    window.location.href = 'power.html'; 
+                    break;
+                case 'realtime':
+                    window.location.href = 'realtime.html'; 
+                    break;
+                default:
+                    console.error('Invalid page');
+            }
+        }
+    </script>
+</body>
+</html>
